@@ -12,20 +12,19 @@ export default function TopBar({ onDelete, hasSelection, onDownload }) {
       </div>
 
       <div className="flex gap-3">
-        <button 
+        <button
           onClick={onDelete}
           disabled={!hasSelection}
-          className={`px-6 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
-            hasSelection 
-              ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg hover:shadow-xl hover:scale-105' 
+          className={`px-6 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${hasSelection
+              ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg hover:shadow-xl hover:scale-105'
               : 'bg-white/10 text-white/40 cursor-not-allowed'
-          }`}
+            }`}
         >
           <span>🗑️</span>
           Delete
         </button>
-        <button 
-          onClick={onDownload} 
+        <button
+          onClick={onDownload}
           className="px-6 py-2.5 bg-white text-purple-600 font-semibold rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-2"
         >
           <span>⬇️</span>

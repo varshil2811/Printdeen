@@ -4,28 +4,28 @@ import useImage from "use-image";
 
 function CanvasImage({ src, isSelected, onSelect, imageRef }) {
   const [image] = useImage(src);
-  
+
   if (!image) return null;
-  
-  const canvasWidth = 700;
-  const canvasHeight = 550;
+
+  const canvasWidth = 1200;
+  const canvasHeight = 800;
   const imgWidth = image.width;
   const imgHeight = image.height;
-  
+
   const scale = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight, 1);
   const width = imgWidth * scale;
   const height = imgHeight * scale;
   const x = (canvasWidth - width) / 2;
   const y = (canvasHeight - height) / 2;
-  
+
   return (
-    <Image 
-      image={image} 
-      x={x} 
-      y={y} 
-      width={width} 
-      height={height} 
-      draggable 
+    <Image
+      image={image}
+      x={x}
+      y={y}
+      width={width}
+      height={height}
+      draggable
       onClick={onSelect}
       onTap={onSelect}
       ref={isSelected ? imageRef : null}
@@ -48,6 +48,22 @@ export default function CanvasArea({ uploadedImage, texts, elements, onTextEdit,
   const imageRef = useRef(null);
   const imageTransformerRef = useRef(null);
   const layerRef = useRef(null);
+
+  useEffect(() => {
+    if (!uploadedImage) setSelectedImageId(null);
+  }, [uploadedImage]);
+
+  useEffect(() => {
+    if (selectedShapeId && !elements.some((e) => e.id === selectedShapeId)) {
+      setSelectedShapeId(null);
+    }
+  }, [elements, selectedShapeId]);
+
+  useEffect(() => {
+    if (selectedId && !texts.some((t) => t.id === selectedId)) {
+      setSelectedId(null);
+    }
+  }, [texts, selectedId]);
 
   useEffect(() => {
     if (selectedImageId && imageTransformerRef.current && imageRef.current) {
@@ -118,28 +134,28 @@ export default function CanvasArea({ uploadedImage, texts, elements, onTextEdit,
   return (
     <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
       <div className="bg-white shadow-2xl overflow-hidden">
-        <Stage width={700} height={550} ref={stageRef}>
+        <Stage width={1200} height={800} ref={stageRef}>
           <Layer>
             <Rect
               x={0}
               y={0}
-              width={700}
-              height={550}
+              width={1200}
+              height={800}
               fill={backgroundColor || "#ffffff"}
             />
 
             {uploadedImage && (
-              <CanvasImage 
-                src={uploadedImage} 
+              <CanvasImage
+                src={uploadedImage}
                 isSelected={selectedImageId === 'uploaded'}
                 onSelect={() => setSelectedImageId('uploaded')}
                 imageRef={imageRef}
               />
             )}
-            
+
             {selectedImageId && <Transformer ref={imageTransformerRef} />}
           </Layer>
-          
+
           <Layer ref={layerRef}>
             {elements && elements.map((el) => {
               const isSelected = selectedShapeId === el.id;
@@ -173,48 +189,50 @@ export default function CanvasArea({ uploadedImage, texts, elements, onTextEdit,
               }
               return null;
             })}
-            
+
             {texts.map((text) => {
               console.log('Rendering text:', text);
               const isTextSelected = selectedId === text.id;
               return (
-              <Text
-                key={text.id}
-                text={text.content}
-                x={text.x}
-                y={text.y}
-                fontSize={text.fontSize}
-                fontStyle={text.fontStyle || 'normal'}
-                fill={text.color || "#000000"}
-                draggable
-                onDblClick={() => handleDoubleClick(text)}
-                onClick={() => {
-                  setSelectedId(text.id);
-                  if (textRef.current) {
-                    textRef.current.moveToTop();
-                  }
-                }}
-                visible={editingId !== text.id}
-                ref={isTextSelected ? textRef : null}
-              />
-            )})}
-            
+                <Text
+                  key={text.id}
+                  text={text.content}
+                  x={text.x}
+                  y={text.y}
+                  fontSize={text.fontSize}
+                  fontStyle={text.fontStyle || 'normal'}
+                  fontFamily={text.fontFamily || 'Arial'}
+                  fill={text.color || "#000000"}
+                  draggable
+                  onDblClick={() => handleDoubleClick(text)}
+                  onClick={() => {
+                    setSelectedId(text.id);
+                    if (textRef.current) {
+                      textRef.current.moveToTop();
+                    }
+                  }}
+                  visible={editingId !== text.id}
+                  ref={isTextSelected ? textRef : null}
+                />
+              )
+            })}
+
             {!uploadedImage && texts.length === 0 && elements.length === 0 && (
               <Text
                 text="✨ Your Design Canvas"
-                x={220}
-                y={250}
-                fontSize={28}
+                x={450}
+                y={380}
+                fontSize={32}
                 fill="#7c3aed"
                 fontStyle="bold"
               />
             )}
-            
+
             {selectedShapeId && <Transformer ref={transformerRef} />}
             {selectedId && !editingId && <Transformer ref={textTransformerRef} />}
           </Layer>
         </Stage>
-        
+
         {editingId && (
           <div style={{
             position: "absolute",
@@ -229,6 +247,9 @@ export default function CanvasArea({ uploadedImage, texts, elements, onTextEdit,
               onKeyDown={(e) => e.key === "Enter" && handleBlur()}
               style={{
                 fontSize: texts.find(t => t.id === editingId)?.fontSize || 16,
+                fontFamily: texts.find(t => t.id === editingId)?.fontFamily || 'Arial',
+                fontStyle: texts.find(t => t.id === editingId)?.fontStyle?.includes('italic') ? 'italic' : 'normal',
+                fontWeight: texts.find(t => t.id === editingId)?.fontStyle?.includes('bold') ? 'bold' : 'normal',
                 border: "2px solid #7c3aed",
                 outline: "none",
                 padding: "2px",

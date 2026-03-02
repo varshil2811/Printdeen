@@ -11,9 +11,9 @@ export default function App() {
   const [selectedItem, setSelectedItem] = useState(null);
   const stageRef = useRef(null);
 
-  const handleAddText = (content, fontSize, color) => {
+  const handleAddText = (content, fontSize, color, fontFamily = "Arial", fontStyle = "normal") => {
     console.log('Adding text with color:', color);
-    setTexts([...texts, { id: Date.now(), content, fontSize, color, x: 100, y: 100 }]);
+    setTexts([...texts, { id: Date.now(), content, fontSize, color, fontFamily, fontStyle, x: 100, y: 100 }]);
   };
 
   const handleAddElement = (type, color) => {
@@ -34,6 +34,14 @@ export default function App() {
 
   const handleElementColorChange = (id, newColor) => {
     setElements(elements.map(e => e.id === id ? { ...e, color: newColor } : e));
+  };
+
+  const handleTextFontChange = (id, newFontFamily) => {
+    setTexts(texts.map(t => t.id === id ? { ...t, fontFamily: newFontFamily } : t));
+  };
+
+  const handleTextStyleChange = (id, newFontStyle) => {
+    setTexts(texts.map(t => t.id === id ? { ...t, fontStyle: newFontStyle } : t));
   };
 
   const handleTextDelete = (id) => {
@@ -67,17 +75,17 @@ export default function App() {
 
   return (
     <div className="h-screen flex flex-col">
-      <TopBar 
-        onDelete={handleDelete} 
+      <TopBar
+        onDelete={handleDelete}
         hasSelection={!!selectedItem}
         onDownload={handleDownload}
       />
 
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar 
-          onImageUpload={setUploadedImage} 
-          onAddText={handleAddText} 
-          onBackgroundChange={setBackgroundColor} 
+        <Sidebar
+          onImageUpload={setUploadedImage}
+          onAddText={handleAddText}
+          onBackgroundChange={setBackgroundColor}
           onAddElement={handleAddElement}
           selectedItem={selectedItem}
           texts={texts}
@@ -85,13 +93,15 @@ export default function App() {
           onTextColorChange={handleTextColorChange}
           onTextSizeChange={handleTextSizeChange}
           onElementColorChange={handleElementColorChange}
+          onTextFontChange={handleTextFontChange}
+          onTextStyleChange={handleTextStyleChange}
         />
-        <CanvasArea 
-          uploadedImage={uploadedImage} 
-          texts={texts} 
-          elements={elements} 
-          onTextEdit={handleTextEdit} 
-          onTextDelete={handleTextDelete} 
+        <CanvasArea
+          uploadedImage={uploadedImage}
+          texts={texts}
+          elements={elements}
+          onTextEdit={handleTextEdit}
+          onTextDelete={handleTextDelete}
           backgroundColor={backgroundColor}
           onSelectionChange={setSelectedItem}
           stageRef={stageRef}
