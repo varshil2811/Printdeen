@@ -49,6 +49,29 @@ export default function CanvasArea({ uploadedImage, texts, elements, onTextEdit,
   const imageTransformerRef = useRef(null);
   const layerRef = useRef(null);
 
+  const containerRef = useRef(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        const { clientWidth, clientHeight } = containerRef.current;
+        const scaleX = clientWidth / 1200;
+        const scaleY = clientHeight / 800;
+        const newScale = Math.min(scaleX, scaleY) * 0.95;
+        setScale(newScale < 1 ? newScale : 1);
+      }
+    };
+
+    handleResize();
+    const observer = new ResizeObserver(handleResize);
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     if (!uploadedImage) setSelectedImageId(null);
   }, [uploadedImage]);
@@ -132,9 +155,9 @@ export default function CanvasArea({ uploadedImage, texts, elements, onTextEdit,
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-      <div className="bg-white shadow-2xl overflow-hidden">
-        <Stage width={1200} height={800} ref={stageRef}>
+    <div ref={containerRef} className="flex-1 w-full h-full bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 overflow-hidden flex items-center justify-center p-2 relative">
+      <div className="bg-white shadow-2xl relative flex-shrink-0" style={{ width: 1200 * scale, height: 800 * scale }}>
+        <Stage width={1200 * scale} height={800 * scale} scaleX={scale} scaleY={scale} ref={stageRef}>
           <Layer>
             <Rect
               x={0}
@@ -174,6 +197,10 @@ export default function CanvasArea({ uploadedImage, texts, elements, onTextEdit,
                 },
                 draggable: true,
                 ref: isSelected ? shapeRef : null,
+                onDragEnd: (e) => {
+                  el.x = e.target.x();
+                  el.y = e.target.y();
+                },
               };
 
               if (el.type === 'circle') {
@@ -204,6 +231,10 @@ export default function CanvasArea({ uploadedImage, texts, elements, onTextEdit,
                   fontFamily={text.fontFamily || 'Arial'}
                   fill={text.color || "#000000"}
                   draggable
+                  onDragEnd={(e) => {
+                    text.x = e.target.x();
+                    text.y = e.target.y();
+                  }}
                   onDblClick={() => handleDoubleClick(text)}
                   onClick={() => {
                     setSelectedId(text.id);
@@ -236,8 +267,18 @@ export default function CanvasArea({ uploadedImage, texts, elements, onTextEdit,
         {editingId && (
           <div style={{
             position: "absolute",
-            left: texts.find(t => t.id === editingId)?.x || 0,
-            top: texts.find(t => t.id === editingId)?.y || 0,
+            left: (texts.find(t => t.id === editingId)?.x || 0) * scale,
+            top: (texts.find(t => t.id === editingId)?.y || 0) * scale,
+            transformOrigin: 'top left',
+            transform: `scale(${scale})`,
+            zIndex: 10,
+            display: 'flex',
+            alignItems: 'center',
+            backgroundColor: 'white',
+            boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06)',
+            borderRadius: '0.375rem',
+            padding: '4px',
+            border: '1px solid #e2e8f0',
           }}>
             <input
               ref={inputRef}

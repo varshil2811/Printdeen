@@ -50,56 +50,56 @@ export default function Sidebar({ onImageUpload, onAddText, onBackgroundChange, 
   };
 
   return (
-    <div className="bg-gradient-to-b from-gray-50 to-white shadow-2xl flex border-r border-gray-200 relative" style={{ width: `${width}px` }}>
+    <div className="bg-white shadow-lg flex flex-row border-r border-gray-200 h-full z-20 flex-shrink-0" style={{ width: `${width}px` }}>
       {/* Menu */}
-      <div className="w-20 bg-white border-r border-gray-200 flex flex-col items-center py-6 gap-4">
+      <div className="w-16 md:w-20 bg-gray-50 border-r border-gray-200 flex flex-col items-center py-4 md:py-6 gap-4 overflow-y-auto w-shrink-0">
         <button
           onClick={() => setActive("text")}
-          className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl transition-all duration-200 ${active === "text"
-              ? "bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg scale-110"
-              : "bg-gray-100 hover:bg-gray-200 hover:scale-105"
+          className={`shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center transition-all duration-200 ${active === "text"
+            ? "bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg scale-105 md:scale-110"
+            : "bg-white hover:bg-gray-100 hover:scale-105 border border-gray-200"
             }`}
         >
-          <span className="text-3xl font-bold">Aa</span>
+          <span className="text-xl md:text-3xl font-bold">Aa</span>
         </button>
         <button
           onClick={() => setActive("upload")}
-          className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl transition-all duration-200 ${active === "upload"
-              ? "bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg scale-110"
-              : "bg-gray-100 hover:bg-gray-200 hover:scale-105"
+          className={`shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center transition-all duration-200 ${active === "upload"
+            ? "bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg scale-105 md:scale-110"
+            : "bg-white hover:bg-gray-100 hover:scale-105 border border-gray-200"
             }`}
         >
-          <span className="text-2xl">🖼️</span>
+          <span className="text-xl md:text-2xl">🖼️</span>
         </button>
         <button
           onClick={() => setActive("elements")}
-          className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl transition-all duration-200 ${active === "elements"
-              ? "bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg scale-110"
-              : "bg-gray-100 hover:bg-gray-200 hover:scale-105"
+          className={`shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center transition-all duration-200 ${active === "elements"
+            ? "bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg scale-105 md:scale-110"
+            : "bg-white hover:bg-gray-100 hover:scale-105 border border-gray-200"
             }`}
         >
-          <span className="text-2xl">🔸</span>
+          <span className="text-xl md:text-2xl">🔸</span>
         </button>
         <button
           onClick={() => setActive("background")}
-          className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl transition-all duration-200 ${active === "background"
-              ? "bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg scale-110"
-              : "bg-gray-100 hover:bg-gray-200 hover:scale-105"
+          className={`shrink-0 w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center transition-all duration-200 ${active === "background"
+            ? "bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg scale-105 md:scale-110"
+            : "bg-white hover:bg-gray-100 hover:scale-105 border border-gray-200"
             }`}
         >
-          <span className="text-2xl">🎨</span>
+          <span className="text-xl md:text-2xl">🎨</span>
         </button>
       </div>
 
       {/* Panel */}
-      <div className="flex-1 p-6 overflow-y-auto">
+      <div className="flex-1 p-4 md:p-6 overflow-y-auto bg-white border-gray-200 relative">
         {renderPanel()}
       </div>
 
-      {/* Resize Handle */}
+      {/* Resize Handle (Hidden on mobile) */}
       <div
         onMouseDown={() => setIsResizing(true)}
-        className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize hover:bg-indigo-400 transition-colors z-10"
+        className="hidden md:block absolute right-0 top-0 bottom-0 w-2 cursor-col-resize hover:bg-indigo-400 transition-colors z-10"
         style={{ background: isResizing ? '#818cf8' : 'transparent' }}
       />
     </div>
