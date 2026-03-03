@@ -179,6 +179,7 @@ export default function App() {
           backgroundColor={backgroundColor}
           onSelectionChange={setSelectedItem}
           stageRef={stageRef}
+          onDelete={handleDelete}
         />
       </div>
     </div>

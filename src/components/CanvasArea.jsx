@@ -33,7 +33,7 @@ function CanvasImage({ src, isSelected, onSelect, imageRef }) {
   );
 }
 
-export default function CanvasArea({ uploadedImage, texts, elements, onTextEdit, onTextDelete, backgroundColor, onSelectionChange, stageRef }) {
+export default function CanvasArea({ uploadedImage, texts, elements, onTextEdit, onTextDelete, backgroundColor, onSelectionChange, stageRef, onDelete }) {
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState("");
   const [editColor, setEditColor] = useState("#000000");
@@ -122,22 +122,26 @@ export default function CanvasArea({ uploadedImage, texts, elements, onTextEdit,
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === "Delete") {
-        if (selectedId && !editingId) {
-          onTextDelete(selectedId);
-          setSelectedId(null);
-        } else if (selectedShapeId) {
-          onSelectionChange({ type: 'element', id: selectedShapeId });
-          setSelectedShapeId(null);
-        } else if (selectedImageId) {
-          onSelectionChange({ type: 'image', id: 'uploaded' });
-          setSelectedImageId(null);
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.isContentEditable) return;
+
+      if (e.key === "Delete" || e.key === "Backspace") {
+        if (!editingId && (selectedId || selectedShapeId || selectedImageId)) {
+          onDelete();
         }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedId, selectedShapeId, selectedImageId, editingId, onTextDelete, onSelectionChange]);
+  }, [selectedId, selectedShapeId, selectedImageId, editingId, onDelete]);
+
+  const checkDeselect = (e) => {
+    const clickedOnEmpty = e.target === e.target.getStage() || e.target.name() === 'background';
+    if (clickedOnEmpty) {
+      setSelectedId(null);
+      setSelectedShapeId(null);
+      setSelectedImageId(null);
+    }
+  };
 
   const handleDoubleClick = (text) => {
     setEditingId(text.id);
@@ -157,7 +161,15 @@ export default function CanvasArea({ uploadedImage, texts, elements, onTextEdit,
   return (
     <div ref={containerRef} className="flex-1 w-full h-full bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 overflow-hidden flex items-center justify-center p-2 relative">
       <div className="bg-white shadow-2xl relative flex-shrink-0" style={{ width: 1200 * scale, height: 800 * scale }}>
-        <Stage width={1200 * scale} height={800 * scale} scaleX={scale} scaleY={scale} ref={stageRef}>
+        <Stage
+          width={1200 * scale}
+          height={800 * scale}
+          scaleX={scale}
+          scaleY={scale}
+          ref={stageRef}
+          onMouseDown={checkDeselect}
+          onTouchStart={checkDeselect}
+        >
           <Layer>
             <Rect
               x={0}
@@ -165,13 +177,19 @@ export default function CanvasArea({ uploadedImage, texts, elements, onTextEdit,
               width={1200}
               height={800}
               fill={backgroundColor || "#ffffff"}
+              name="background"
             />
 
             {uploadedImage && (
               <CanvasImage
                 src={uploadedImage}
                 isSelected={selectedImageId === 'uploaded'}
-                onSelect={() => setSelectedImageId('uploaded')}
+                onSelect={(e) => {
+                  if (e) e.cancelBubble = true;
+                  setSelectedImageId('uploaded');
+                  setSelectedId(null);
+                  setSelectedShapeId(null);
+                }}
                 imageRef={imageRef}
               />
             )}
@@ -183,21 +201,28 @@ export default function CanvasArea({ uploadedImage, texts, elements, onTextEdit,
             {elements && elements.map((el) => {
               const isSelected = selectedShapeId === el.id;
               const shapeProps = {
-                onClick: () => {
+                onClick: (e) => {
+                  e.cancelBubble = true;
                   setSelectedShapeId(el.id);
-                  if (shapeRef.current) {
-                    shapeRef.current.moveToTop();
-                  }
+                  setSelectedId(null);
+                  setSelectedImageId(null);
                 },
-                onTap: () => {
+                onTap: (e) => {
+                  e.cancelBubble = true;
                   setSelectedShapeId(el.id);
-                  if (shapeRef.current) {
-                    shapeRef.current.moveToTop();
-                  }
+                  setSelectedId(null);
+                  setSelectedImageId(null);
                 },
                 draggable: true,
                 ref: isSelected ? shapeRef : null,
+                onDragStart: (e) => {
+                  e.cancelBubble = true;
+                  setSelectedShapeId(el.id);
+                  setSelectedId(null);
+                  setSelectedImageId(null);
+                },
                 onDragEnd: (e) => {
+                  e.cancelBubble = true;
                   el.x = e.target.x();
                   el.y = e.target.y();
                 },
@@ -231,16 +256,32 @@ export default function CanvasArea({ uploadedImage, texts, elements, onTextEdit,
                   fontFamily={text.fontFamily || 'Arial'}
                   fill={text.color || "#000000"}
                   draggable
+                  onDragStart={(e) => {
+                    e.cancelBubble = true;
+                    setSelectedId(text.id);
+                    setSelectedShapeId(null);
+                    setSelectedImageId(null);
+                  }}
                   onDragEnd={(e) => {
+                    e.cancelBubble = true;
                     text.x = e.target.x();
                     text.y = e.target.y();
                   }}
-                  onDblClick={() => handleDoubleClick(text)}
-                  onClick={() => {
+                  onDblClick={(e) => {
+                    e.cancelBubble = true;
+                    handleDoubleClick(text);
+                  }}
+                  onClick={(e) => {
+                    e.cancelBubble = true;
                     setSelectedId(text.id);
-                    if (textRef.current) {
-                      textRef.current.moveToTop();
-                    }
+                    setSelectedShapeId(null);
+                    setSelectedImageId(null);
+                  }}
+                  onTap={(e) => {
+                    e.cancelBubble = true;
+                    setSelectedId(text.id);
+                    setSelectedShapeId(null);
+                    setSelectedImageId(null);
                   }}
                   visible={editingId !== text.id}
                   ref={isTextSelected ? textRef : null}
